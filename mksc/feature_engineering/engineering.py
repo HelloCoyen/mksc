@@ -1,7 +1,7 @@
 import pickle
-from feature_engineering import seletction
-from feature_engineering import values
-from feature_engineering import binning
+from mksc.feature_engineering import seletction
+from mksc.feature_engineering import values
+from mksc.feature_engineering import binning
 
 class FeatureEngineering(object):
     def __init__(self, feature, label, missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
