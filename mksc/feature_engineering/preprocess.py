@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from mksc import reader
+from mksc.core import reader
 
 def load_data():
     """
