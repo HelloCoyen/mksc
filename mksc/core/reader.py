@@ -2,7 +2,6 @@ from statsmodels.iolib.smpickle import load_pickle
 import pandas as pd
 import os
 import configparser
-from core.logger import logger
 
 def file(filename):
     if '.csv' in filename:
@@ -15,7 +14,7 @@ def file(filename):
         data = pd.read_excel(filename)
         return data
     else:
-        logger.error("Wrong Data Type")
+        print("Wrong Data Type")
 
 def config():
     cfg = configparser.ConfigParser()

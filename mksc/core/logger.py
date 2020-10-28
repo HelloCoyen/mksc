@@ -3,7 +3,7 @@ import sys
 import socket
 import logging
 import logging.handlers
-from mksc import reader
+from mksc.core import reader
 
 class Logger(object):
     """
