@@ -51,3 +51,13 @@ class Custom(object):
         """
         model = (feature, label)
         return model
+
+
+if __name__ == "__main__":
+    import mksc
+    from mksc.feature_engineering import preprocess
+    # 加载数据、变量类型划分、特征集与标签列划分
+    data = mksc.load_data("pickle")
+    numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
+    feature = data[numeric_var + category_var + datetime_var]
+    label = data[label_var]

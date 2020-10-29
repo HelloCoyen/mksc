@@ -7,13 +7,12 @@ from mksc.feature_engineering import transform
 from custom import Custom
 
 def main():
-
     # 数据、模型加载
     model = load_pickle('result/model.pickle')
     coefs = load_pickle('result/coefs.pickle')
     feature_engineering = load_pickle('result/feature_engineering.pickle')
 
-    data = mksc.load_data()
+    data = mksc.load_data("apply")
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = []
@@ -25,10 +24,17 @@ def main():
     feature[numeric_var] = feature[numeric_var].astype('float')
     feature[category_var] = feature[category_var].astype('object')
     feature[datetime_var] = feature[datetime_var].astype('datetime64')
-    feature = data[list(coefs.keys())[:-1]]
 
     # 自定义特征组合模块
     feature = Custom.feature_combination(feature)
+
+    # One-Hot编码
+    category_var = feature.select_dtypes(include=['object']).columns
+    feature[category_var].fillna("NA", inplace=True)
+    feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+    feature.drop(category_var, axis=1, inplace=True)
+    feature = feature[list(coefs.keys())[:-1]]
+
     # 数据处理
     feature = transform(feature, feature_engineering)
     res = pd.DataFrame(model.predict(feature), columns=['label'])
@@ -37,6 +43,7 @@ def main():
     # 转化评分
     score_card = load_pickle('result/card.pickle')
     res = scoring.transform_score(res, score_card)
+
     # 结果保存
     mksc.save_result(res)
 

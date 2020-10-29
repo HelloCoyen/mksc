@@ -46,4 +46,4 @@ TODO `python project_name\adjust.py`
 
 ## 8. 模型应用与预测
 `python project_name\apply.py`  
-TODO `PYTHON project_name\run.py`  
+`PYTHON project_name\main.py`  

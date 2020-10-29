@@ -52,11 +52,11 @@ class FeatureEngineering(object):
         # 缺失值处理
         feature, missing_filling = values.fix_missing_value(feature, self.missing_threshold[1])
 
-        # 归一化处理
-        # feature = pp.fix_scaling(feature)
-
         # 正态化处理
-        # feature, standard_lambda = pp.fix_standard(feature)
+        feature, standard_lambda = values.fix_standard(feature)
+
+        # 归一化处理
+        feature = values.fix_scaling(feature)
 
         # 数值特征最优分箱，未处理的变量，暂时退出模型
         bin_result, iv_result, woe_result, woe_adjust_result = binning.tree_binning(label, feature)
@@ -75,8 +75,11 @@ class FeatureEngineering(object):
 
         # One-Hot编码
         category_var = feature.select_dtypes(include=['object']).columns
+        feature[category_var].fillna("NA", inplace=True)
         feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-        feature.drop(category_var, inplace=True)
+        feature.drop(category_var, axis=1, inplace=True)
+        unique_value2 = seletction.get_unique_value(feature, self.unique_threshold)
+        feature.drop(unique_value2['drop'], axis=1, inplace=True)
 
         # 逐步回归筛选
         feature_selected = seletction.stepwise_selection(feature, label)
@@ -86,6 +89,7 @@ class FeatureEngineering(object):
         result = {"missing_value": missing_value,
                   "distinct_value": distinct_value,
                   "unique_value": unique_value,
+                  "unique_value2": unique_value2,
                   "abnormal_value": abnormal_value,
                   "missing_filling": missing_filling,
                   "bin_result": bin_result,
