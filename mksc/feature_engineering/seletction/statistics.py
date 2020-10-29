@@ -97,10 +97,13 @@ def get_cor_drop(feature, iv_result, threshold=0.7):
     numeric_var = feature.select_dtypes(exclude=['object', 'datetime']).columns
     cor = feature[numeric_var].corr()
     cor = cor[(abs(cor) > threshold) & (cor != 1)].dropna(how='all', axis=1).dropna(how='all')
-    cor = cor.stack().reset_index()
-    cor.columns = ['Var_1', 'Var_2', 'cor']
-    cor = cor[cor.index % 2 == 0]
-    cor = cor.sort_values(by='cor', ascending=False)
-    cor['smaller_iv'] = cor.apply(lambda x: iv_compare(iv_result, x['Var_1'], x['Var_2']), axis=1)
-    cor_drop = list(filter(lambda x: x, set(cor['smaller_iv'].values)))
-    return cor_drop
+    if not cor.empty:
+        cor = cor.stack().reset_index()
+        cor.columns = ['Var_1', 'Var_2', 'cor']
+        cor = cor[cor.index % 2 == 0]
+        cor = cor.sort_values(by='cor', ascending=False)
+        cor['smaller_iv'] = cor.apply(lambda x: iv_compare(iv_result, x['Var_1'], x['Var_2']), axis=1)
+        cor_drop = list(filter(lambda x: x, set(cor['smaller_iv'].values)))
+        return cor_drop
+    else:
+        return []

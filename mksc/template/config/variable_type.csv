@@ -1,0 +1,13 @@
+Variable,isSave:[0/1],Type:[numeric/category/datetime/label],Comment
+PassengerId,0,category,游客ID
+Survived,1,label,是否存活
+Pclass,1,category,等级
+Name,1,category,姓名
+Sex,1,category,性别
+Age,1,numeric,年龄
+SibSp,1,category,
+Parch,1,category,
+Ticket,1,category,
+Fare,1,numeric,票价
+Cabin,1,category,
+Embarked,1,category,

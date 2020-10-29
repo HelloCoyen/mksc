@@ -2,20 +2,26 @@ import numpy as np
 import pandas as pd
 from mksc.core import reader
 
-def load_data():
+def load_data(mode='train'):
     """
     加载配置文件指定数据源，返回数据
-
+    Args:
+        mode: 数据集读取类别。“train”: 读取带标签的数据集； “apply": 读取不带标签的数据集
     Returns:
         data: 配置文件数据框
     """
     cfg = reader.config()
-    if bool(cfg.get('DATABASE', 'engine_url')):
+    if mode == 'train':
         sql = cfg.get('DATABASE', 'sql')
+        file = cfg.get('PATH', 'data_file')
+    else:
+        sql = cfg.get('DATABASE', 'apply_sql')
+        file = cfg.get('PATH', 'apply_file')
+
+    if bool(cfg.get('DATABASE', 'engine_url')):
         engine = cfg.get('DATABASE', 'engine_url')
         data = pd.read_sql(sql, engine)
     else:
-        file = cfg.get('PATH', 'data_file')
         data = reader.file(file)
 
     # 大小写标准化
@@ -39,7 +45,7 @@ def get_variable_type():
         datetime: 日期型变量列表
         label_name: 标签列
     """
-    variable_type = pd.read_csv("conf/variable_type.csv", encoding='gbk')
+    variable_type = pd.read_csv("config/variable_type.csv", encoding='gbk')
     label_var = variable_type[variable_type.iloc[:, 2] == 'label']
     numeric_var = variable_type[(variable_type.iloc[:, 2] == 'numeric') & (variable_type.iloc[:, 1] == 1)]
     category_var = variable_type[(variable_type.iloc[:, 2] == 'category') & (variable_type.iloc[:, 1] == 1)]

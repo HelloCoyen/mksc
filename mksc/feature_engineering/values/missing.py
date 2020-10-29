@@ -16,10 +16,11 @@ def fix_missing_value(feature, threshold=0.05):
     for c in feature:
         missing_rate = feature[c].isna().sum()/len(feature)
         if missing_rate <= threshold and missing_rate:
-            missing_filling['result'][c] = {'fill_number': feature[c].mean(), 'missing_value_rate': missing_rate}
-            missing_filling['replace'].append(c)
             if c in numeric_var:
-                feature[c].fillna(missing_filling['result'][c], inplace=True)
+                fill_value = feature[c].mean()
             else:
-                feature[c].fillna(feature[c].mode(), inplace=True)
+                fill_value = feature[c].mode()
+            feature[c].fillna(fill_value, inplace=True)
+            missing_filling['result'][c] = {'fill_value': fill_value, 'missing_value_rate': missing_rate}
+            missing_filling['replace'].append(c)
     return feature, missing_filling

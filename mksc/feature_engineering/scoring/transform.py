@@ -7,5 +7,5 @@ def transform_score(data, score_card):
         for k in set(score_card[score_card['Bins'] != '-']['Variables']):
             bin_score = score_card[(score_card['Woe'] == data.iloc[i][k]) & (score_card['Variables'] == k)]['Score']
             score_i += bin_score.values[0]
-        data.iloc[i]['Score'] = score_i
+        data['Score'].iloc[i] = score_i
     return data
