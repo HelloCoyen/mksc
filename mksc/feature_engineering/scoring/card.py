@@ -14,7 +14,7 @@ def make_card(coefs, woe_result, odds, score, pdo):
             woe_result[v].rename(columns={v: "Bins", 'woe_i': 'Woe'}, inplace=True)
             woe_result[v]['Score'] = woe_result[v]['Woe'].apply(lambda x: int(-x * b * coefs[v]))
             score_card = pd.concat([score_card, woe_result[v]])
-    score_card.to_excel('result/score_card.xlsx', index=False)
-    with open("result/score_card.pickle", 'wb') as f:
+    score_card.to_excel('result/card.xlsx', index=False)
+    with open("result/card.pickle", 'wb') as f:
         f.write(pickle.dumps(score_card))
     return score_card

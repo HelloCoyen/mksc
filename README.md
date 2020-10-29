@@ -45,5 +45,5 @@ mksc project_name
 TODO `python project_name\adjust.py`
 
 ## 8. 模型应用与预测
-TODO `python project_name\apply.py`  
-TODO `PYTHON project_name\run_project_name.py`  
+`python project_name\apply.py`  
+TODO `PYTHON project_name\run.py`  

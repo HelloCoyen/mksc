@@ -79,7 +79,7 @@ def main():
     项目训练程序入口
     """
     # 加载数据、变量类型划分、特征集与标签列划分
-    data = mksc.load_data()
+    data = mksc.load_data("pickle")
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = data[label_var]
@@ -92,14 +92,10 @@ def main():
     feature[category_var] = feature[category_var].astype('object')
     feature[datetime_var] = feature[datetime_var].astype('datetime64')
 
-    # One-Hot编码
-    # feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-    # feature.drop(category_var+datetime_var, inplace=True)
-
-    # 特征工程
-    # 自定义特征组合模块
+    # 自定义特征组合
     feature = Custom.feature_combination(feature)
 
+    # 标准化特征工程
     fe = FeatureEngineering(feature, label)
     feature = fe.run()
 

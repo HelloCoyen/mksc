@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
+import os
 from mksc.core import reader
 
 def load_data(mode='train'):
     """
     加载配置文件指定数据源，返回数据
     Args:
-        mode: 数据集读取类别。“train”: 读取带标签的数据集； “apply": 读取不带标签的数据集
+        mode: 数据集读取类别。“train”: 读取带标签的数据集； “apply": 读取不带标签的数据集； “pickle”: 对象数据文件
     Returns:
         data: 配置文件数据框
     """
@@ -14,11 +15,14 @@ def load_data(mode='train'):
     if mode == 'train':
         sql = cfg.get('DATABASE', 'sql')
         file = cfg.get('PATH', 'data_file')
-    else:
+    elif mode == "apply":
         sql = cfg.get('DATABASE', 'apply_sql')
         file = cfg.get('PATH', 'apply_file')
+    else:
+        sql = ''
+        file = os.path.join(cfg.get('PATH', 'work_dir'), "data", "data.pickle")
 
-    if bool(cfg.get('DATABASE', 'engine_url')):
+    if bool(cfg.get('DATABASE', 'engine_url')) and mode != "pickle":
         engine = cfg.get('DATABASE', 'engine_url')
         data = pd.read_sql(sql, engine)
     else:

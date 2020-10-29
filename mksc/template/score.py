@@ -14,7 +14,7 @@ def main():
     pdo = cfg.get('SCORECARD', 'pdo')
     woe_result = load_pickle("result/feature_engineering.pickle")["woe_result"]
     coefs = load_pickle("result/coefs.pickle")
-    ps.make_card(coefs, woe_result, odds, score, pdo)
+    scoring.make_card(coefs, woe_result, odds, score, pdo)
 
 
 if __name__ == "__main__":

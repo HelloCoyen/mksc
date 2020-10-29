@@ -1,19 +1,21 @@
 import pickle
+import pandas as pd
 from mksc.feature_engineering import seletction
 from mksc.feature_engineering import values
 from mksc.feature_engineering import binning
 
 class FeatureEngineering(object):
+
     def __init__(self, feature, label, missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
                  abnormal_threshold=0.05, correlation_threshold=0.7):
         self.feature = feature
         self.label = label
-        self.threshold = {}
         self.missing_threshold = missing_threshold
         self.distinct_threshold = distinct_threshold
         self.unique_threshold = unique_threshold
         self.abnormal_threshold = abnormal_threshold
         self.correlation_threshold = correlation_threshold
+        self.threshold = {}
 
     def run(self):
         """
@@ -37,6 +39,7 @@ class FeatureEngineering(object):
         """
         feature = self.feature
         label = self.label
+
         # 基于缺失率、唯一率、众数比例统计特征筛选
         missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
         distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
@@ -69,6 +72,11 @@ class FeatureEngineering(object):
 
         # woe转化
         feature = binning.woe_transform(feature, woe_result, bin_result)
+
+        # One-Hot编码
+        category_var = feature.select_dtypes(include=['object']).columns
+        feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+        feature.drop(category_var, inplace=True)
 
         # 逐步回归筛选
         feature_selected = seletction.stepwise_selection(feature, label)

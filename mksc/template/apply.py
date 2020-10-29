@@ -35,10 +35,10 @@ def main():
     res = pd.concat([feature, res], axis=1)
 
     # 转化评分
-    score_card = load_pickle('result/score_card.pickle')
+    score_card = load_pickle('result/card.pickle')
     res = scoring.transform_score(res, score_card)
     # 结果保存
-    res.save()
+    mksc.save_result(res)
 
 
 if __name__ == '__main__':
