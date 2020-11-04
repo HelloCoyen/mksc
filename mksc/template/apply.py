@@ -6,11 +6,13 @@ from mksc.feature_engineering import scoring
 from mksc.feature_engineering import transform
 from custom import Custom
 
-def main():
+def main(card=False):
     # 数据、模型加载
     model = load_pickle('result/model.pickle')
-    coefs = load_pickle('result/coefs.pickle')
     feature_engineering = load_pickle('result/feature_engineering.pickle')
+    coefficient = list(zip(feature_engineering["feature_selected"], list(model.coef_[0])))
+    coefficient.append(("intercept_", model.intercept_[0]))
+    coefs = dict(coefficient)
 
     data = mksc.load_data("apply")
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
@@ -40,9 +42,10 @@ def main():
     res = pd.DataFrame(model.predict(feature), columns=['label'])
     res = pd.concat([feature, res], axis=1)
 
-    # 转化评分
-    score_card = load_pickle('result/card.pickle')
-    res = scoring.transform_score(res, score_card)
+    if card:
+        # 转化评分
+        score_card = load_pickle('result/card.pickle')
+        res = scoring.transform_score(res, score_card)
 
     # 结果保存
     mksc.save_result(res)

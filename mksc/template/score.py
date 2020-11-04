@@ -12,8 +12,12 @@ def main():
     odds = cfg.get('SCORECARD', 'odds')
     score = cfg.get('SCORECARD', 'score')
     pdo = cfg.get('SCORECARD', 'pdo')
-    woe_result = load_pickle("result/feature_engineering.pickle")["woe_result"]
-    coefs = load_pickle("result/coefs.pickle")
+    feature_engineering = load_pickle("result/feature_engineering.pickle")
+    woe_result = feature_engineering["woe_result"]
+    model = load_pickle("result/lr.pickle")
+    coefficient = list(zip(feature_engineering["feature_selected"], list(model.coef_[0])))
+    coefficient.append(("intercept_", model.intercept_[0]))
+    coefs = dict(coefficient)
     scoring.make_card(coefs, woe_result, odds, score, pdo)
 
 

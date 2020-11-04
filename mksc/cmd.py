@@ -17,6 +17,9 @@ def make_workspace(name):
         project = os.path.join(os.getcwd(), name)
         shutil.copytree(templates, project)
 
+    os.mkdir(os.path.join(os.getcwd(), name, 'result'))
+    os.mkdir(os.path.join(os.getcwd(), name, 'log'))
+
     with open(os.path.join(project, 'config', 'configuration.ini'), "r", encoding='utf-8') as f:
         content = f.read()
     with open(os.path.join(project, 'config', 'configuration.ini'), "w", encoding='utf-8') as f:

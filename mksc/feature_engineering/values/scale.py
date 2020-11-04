@@ -10,7 +10,9 @@ def fix_scaling(feature):
         feature: 已处理数据框
     """
     numeric_var = feature.select_dtypes(exclude=['object', 'datetime']).columns
+    scale_result = {}
     for c in numeric_var:
         sm = feature[c].describe()
+        scale_result[c] = {'mean': sm['mean'], 'std': sm['std']}
         feature[c] = feature[c].apply(lambda x: (x - sm['mean'])/sm['std'] if x else x)
-    return feature
+    return feature, scale_result
