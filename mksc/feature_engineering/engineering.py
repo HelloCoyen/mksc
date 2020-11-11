@@ -3,6 +3,8 @@ import pandas as pd
 from mksc.feature_engineering import seletction
 from mksc.feature_engineering import values
 from mksc.feature_engineering import binning
+from imblearn.over_sampling import SMOTE
+
 
 class FeatureEngineering(object):
 
@@ -38,9 +40,11 @@ class FeatureEngineering(object):
         10. woe转化
         11. One-Hot
         12. XXX 降维：逐步回归筛选
+        13. XXX 采样
 
         Returns:
-            feature： 已完成特征工程的数据框
+            feature: 已完成特征工程的数据框
+            label: 已完成特征工程的标签列
         """
         feature = self.feature
         label = self.label
@@ -87,6 +91,10 @@ class FeatureEngineering(object):
             tmp = seletction.get_unique_value(feature, self.unique_threshold)
             feature.drop(tmp['drop'], axis=1, inplace=True)
 
+        # 重采样
+        if label.sum()/len(label) < 0.1 or label.sum()/len(label) > 0.9:
+            feature, label = SMOTE().fit_sample(feature, label)
+
         # 逐步回归筛选
         feature_selected = seletction.stepwise_selection(feature, label)
         feature = feature[feature_selected]
@@ -110,4 +118,4 @@ class FeatureEngineering(object):
                   }
         with open('result/feature_engineering.pickle', 'wb') as f:
             f.write(pickle.dumps(result))
-        return feature
+        return feature, label

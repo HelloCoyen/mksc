@@ -6,6 +6,9 @@ class Custom(object):
     """
     自定义预处理类函数封装
     """
+    def __init__(self):
+        pass
+
     @staticmethod
     def clean_data(feature, label):
         """
@@ -44,13 +47,18 @@ class Custom(object):
         # 日期变量处理
         return feature_tmp
 
-    @staticmethod
-    def custom_model(feature, label):
-        """
-        TODO 自定义模型
-        """
-        model = (feature, label)
-        return model
+class CustomModel(object):
+    """
+    自定义模型, 必须包括以下三个方法
+    """
+    def fit(self, x, y):
+        pass
+
+    def predict(self, x):
+        return
+
+    def predict_proba(self, x):
+        return
 
 
 if __name__ == "__main__":
@@ -58,7 +66,10 @@ if __name__ == "__main__":
     import mksc
     from mksc.feature_engineering import preprocess
     # 加载数据、变量类型划分、特征集与标签列划分
-    data = mksc.load_data("pickle")
+    data = mksc.load_data()
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = data[label_var]
+    feature[numeric_var] = feature[numeric_var].astype('float')
+    feature[category_var] = feature[category_var].astype('object')
+    feature[datetime_var] = feature[datetime_var].astype('datetime64')

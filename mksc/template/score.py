@@ -9,9 +9,9 @@ def main():
     """
     cfg = configparser.ConfigParser()
     cfg.read(os.path.join(os.getcwd(), 'config', 'configuration.ini'), encoding='utf_8_sig')
-    odds = cfg.get('SCORECARD', 'odds')
-    score = cfg.get('SCORECARD', 'score')
-    pdo = cfg.get('SCORECARD', 'pdo')
+    odds = cfg.get('SCORECARD', 'ODDS')
+    score = cfg.get('SCORECARD', 'SCORE')
+    pdo = cfg.get('SCORECARD', 'PDO')
     feature_engineering = load_pickle("result/feature_engineering.pickle")
     woe_result = feature_engineering["woe_result"]
     model = load_pickle("result/lr.pickle")

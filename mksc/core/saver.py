@@ -1,9 +1,9 @@
 from mksc.core import reader
 import os
 
-def save_result(data, mode="local"):
+def save_result(data, filename, remote=False):
     cfg = reader.config()
-    if mode == "local":
-        data.to_csv(os.path.join(cfg.get('PATH', 'save_dir'), 'apply_result.csv'), index=False)
+    if remote:
+        data.to_sql(cfg.get('DATABASE', 'SCHEMA_NAME'), cfg.get('DATABASE', 'SAVE_ENGINE_URL'), if_exists='replace')
     else:
-        data.to_sql(cfg.get('DATABASE', 'schema_name'), cfg.get('DATABASE', 'engine_url'), if_exists='replace')
+        data.to_csv(os.path.join(cfg.get('PATH', 'SAVE_DIR'), filename), index=False)

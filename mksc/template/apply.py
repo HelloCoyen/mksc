@@ -1,19 +1,20 @@
 from statsmodels.iolib.smpickle import load_pickle
 import pandas as pd
+import configparser
+from datetime import date
+from math import log
+import os
 import mksc
 from mksc.feature_engineering import preprocess
 from mksc.feature_engineering import scoring
 from mksc.feature_engineering import transform
 from custom import Custom
 
-def main(card=False):
+def main(model_name, card=False, score=True):
     # 数据、模型加载
-    model = load_pickle('result/model.pickle')
-    feature_engineering = load_pickle('result/feature_engineering.pickle')
-    coefficient = list(zip(feature_engineering["feature_selected"], list(model.coef_[0])))
-    coefficient.append(("intercept_", model.intercept_[0]))
-    coefs = dict(coefficient)
+    model, threshold = load_pickle(f'result/{model_name}.pickle')
 
+    feature_engineering = load_pickle('result/feature_engineering.pickle')
     data = mksc.load_data("apply")
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
@@ -33,23 +34,42 @@ def main(card=False):
     # One-Hot编码
     category_var = feature.select_dtypes(include=['object']).columns
     feature[category_var].fillna("NA", inplace=True)
-    feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+    if not feature[category_var].empty:
+        feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
     feature.drop(category_var, axis=1, inplace=True)
-    feature = feature[list(coefs.keys())[:-1]]
+    feature = feature[feature_engineering['feature_selected']]
 
     # 数据处理
     feature = transform(feature, feature_engineering)
-    res = pd.DataFrame(model.predict(feature), columns=['label'])
-    res = pd.concat([feature, res], axis=1)
 
-    if card:
+    # 应用预测
+    res_label = pd.DataFrame(model.predict(feature), columns=['label_predict'])
+    res_prob = pd.DataFrame(model.predict_proba(feature), columns=['probability_0', "probability_1"])
+    res_prob['res_odds'] = res_prob['probability_0'] / res_prob["probability_1"]
+    res_prob['label_threshold'] = res_prob['probability_1'].apply(lambda x: 0 if x < threshold else 1)
+    res = pd.concat([data, feature, res_label, res_prob], axis=1)
+
+    if card and model_name == 'lr':
         # 转化评分
         score_card = load_pickle('result/card.pickle')
         res = scoring.transform_score(res, score_card)
 
+    if score:
+        cfg = configparser.ConfigParser()
+        cfg.read(os.path.join(os.getcwd(), 'config', 'configuration.ini'), encoding='utf_8_sig')
+        odds = cfg.get('SCORECARD', 'odds')
+        score = cfg.get('SCORECARD', 'score')
+        pdo = cfg.get('SCORECARD', 'pdo')
+        a, b = scoring.make_score(odds, score, pdo)
+        res['Score'] = res_prob['res_odds'].apply(lambda x: a + b * log(float(x)))
+
     # 结果保存
-    mksc.save_result(res)
+    res['load_date'] = str(date.today())
+    mksc.save_result(res, mode="remote")
+    mksc.save_result(res, "apply_result.csv")
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if len(sys.argv) == 2:
+        main(sys.argv[1])

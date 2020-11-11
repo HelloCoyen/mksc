@@ -1,5 +1,5 @@
 # Make Scorecard(mksc)
-快速构建二分类模型,标准化特征工程以及拓展制作评分卡,文件说明见`doc\说明手册.md`
+快速构建二分类模型,标准化特征工程以及拓展制作评分卡,文件说明见`docs\instruction.md`
 
 ## 1. 安装工具包
 ```
@@ -32,18 +32,20 @@ mksc project_name
 
 ## 5. 自定义数据清洗
 编写自定义数据清洗与特征组合过程函数`project_name\custom.py`。  
-自定义过程封装在Custom类中，定义了3个静态方法，`clean_data`用于处理行方向的数据与值修改，
-`feature_combination`用于扩展列，`model`用于替换训练模型。
+自定义过程封装在Custom类中，定义了2个静态方法，`clean_data`用于处理行方向的数据与值修改，
+`feature_combination`用于扩展列。`CustomModel`类用于替换训练模型。
 
 ## 6. 训练模块
-完成以上配置后，执行训练`python project_name\train.py`。  
-模型结果、特征工程结果均置于`project_name\result`下
+完成以上配置后，执行特征工程`python project_name\feature.py`。  
+完成特征工程，执行训练`python project_name\train.py`。  
+模型结果、特征工程结果均置于`project_name\result`下.  
 至此完成二分类项目构建
 
 ## 7. 评分卡与模型调整
+如果训练逻辑回归模型可选制作评分卡
 `python project_name\score.py`  
 TODO `python project_name\adjust.py`
 
 ## 8. 模型应用与预测
 `python project_name\apply.py`  
-`python project_name\main.py`  
+`python project_name\run.py`  

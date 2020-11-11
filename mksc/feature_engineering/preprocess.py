@@ -3,30 +3,35 @@ import pandas as pd
 import os
 from mksc.core import reader
 
-def load_data(mode='train'):
+def load_data(mode='all', local=True):
     """
     加载配置文件指定数据源，返回数据
     Args:
-        mode: 数据集读取类别。“train”: 读取带标签的数据集； “apply": 读取不带标签的数据集； “pickle”: 对象数据文件
+        mode: 数据集读取类别。“all”: 读取带标签的全部数据集； “apply": 读取不带标签的数据集
+        local: 是否读取本地pickle对象文件
     Returns:
         data: 配置文件数据框
     """
     cfg = reader.config()
-    if mode == 'train':
-        sql = cfg.get('DATABASE', 'sql')
-        file = cfg.get('PATH', 'data_file')
+    if mode == 'all':
+        mode = 'data'
+        sql = cfg.get('DATABASE', 'SQL')
+        file = cfg.get('PATH', 'DATA_FILE')
+        engine = cfg.get('DATABASE', 'ENGINE_URL')
     elif mode == "apply":
-        sql = cfg.get('DATABASE', 'apply_sql')
-        file = cfg.get('PATH', 'apply_file')
+        sql = cfg.get('DATABASE', 'APPLY_SQL')
+        file = cfg.get('PATH', 'APPLY_DATA_FILE')
+        engine = cfg.get('DATABASE', 'APPLY_ENGINE_URL')
     else:
-        sql = ''
-        file = os.path.join(cfg.get('PATH', 'work_dir'), "data", "data.pickle")
+        raise ValueError("Wrong mode type passed, only accepted [all/apply]")
 
-    if bool(cfg.get('DATABASE', 'engine_url')) and mode != "pickle":
-        engine = cfg.get('DATABASE', 'engine_url')
-        data = pd.read_sql(sql, engine)
-    else:
+    if os.path.exists(os.path.join(cfg.get('PATH', 'WORK_DIR'), "data", f"{mode}.pickle")):
+        file = os.path.join(cfg.get('PATH', 'WORK_DIR'), "data", f"{mode}.pickle")
+
+    if local:
         data = reader.file(file)
+    else:
+        data = pd.read_sql(sql, engine)
 
     # 大小写标准化
     for c in data.select_dtypes(include=['object']).columns:
