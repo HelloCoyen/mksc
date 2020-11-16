@@ -1,4 +1,4 @@
-from statsmodels.iolib.smpickle import load_pickle
+from statsmodels.iolib.smpickle import load_pickle, save_pickle
 import pandas as pd
 import configparser
 from datetime import date
@@ -30,14 +30,7 @@ def main(model_name, card=False, score=True):
 
     # 自定义特征组合模块
     feature = Custom.feature_combination(feature)
-
-    # One-Hot编码
-    category_var = feature.select_dtypes(include=['object']).columns
-    feature[category_var].fillna("NA", inplace=True)
-    if not feature[category_var].empty:
-        feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-    feature.drop(category_var, axis=1, inplace=True)
-    feature = feature[feature_engineering['feature_selected']]
+    feature.drop(datetime_var, axis=1, inplace=True)
 
     # 数据处理
     feature = transform(feature, feature_engineering)
@@ -65,8 +58,8 @@ def main(model_name, card=False, score=True):
 
     # 结果保存
     res['load_date'] = str(date.today())
-    mksc.save_result(res, mode="remote")
-    mksc.save_result(res, "apply_result.csv")
+    mksc.save_result(res, remote=True)
+    mksc.save_result(res, filename="apply_result.csv")
 
 
 if __name__ == '__main__':

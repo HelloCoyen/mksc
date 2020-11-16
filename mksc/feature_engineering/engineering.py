@@ -49,6 +49,13 @@ class FeatureEngineering(object):
         feature = self.feature
         label = self.label
 
+        # One-Hot编码
+        category_var = feature.select_dtypes(include=['object']).columns
+        if not category_var.empty:
+            feature[category_var].fillna("NA", inplace=True)
+            feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+            feature.drop(category_var, axis=1, inplace=True)
+
         # 基于缺失率、唯一率、众数比例统计特征筛选
         missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
         distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
@@ -82,15 +89,6 @@ class FeatureEngineering(object):
         # woe转化
         feature = binning.woe_transform(feature, woe_result, bin_result)
 
-        # One-Hot编码
-        category_var = feature.select_dtypes(include=['object']).columns
-        if not category_var.empty:
-            feature[category_var].fillna("NA", inplace=True)
-            feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-            feature.drop(category_var, axis=1, inplace=True)
-            tmp = seletction.get_unique_value(feature, self.unique_threshold)
-            feature.drop(tmp['drop'], axis=1, inplace=True)
-
         # 重采样
         if label.sum()/len(label) < 0.1 or label.sum()/len(label) > 0.9:
             feature, label = SMOTE().fit_sample(feature, label)
@@ -118,4 +116,7 @@ class FeatureEngineering(object):
                   }
         with open('result/feature_engineering.pickle', 'wb') as f:
             f.write(pickle.dumps(result))
-        return feature, label
+
+        with open('result/apply_sql.txt', 'wb') as f:
+            sql = ",".join(result["feature_selected"])
+            f.write(f"select {sql} from ")

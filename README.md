@@ -33,7 +33,7 @@ mksc project_name
 ## 5. 自定义数据清洗
 编写自定义数据清洗与特征组合过程函数`project_name\custom.py`。  
 自定义过程封装在Custom类中，定义了2个静态方法，`clean_data`用于处理行方向的数据与值修改，
-`feature_combination`用于扩展列。`CustomModel`类用于替换训练模型。
+`feature_combination`用于扩展列。`CustomModel`类用于替换训练模型，`CustomApply`类用于替换应用过程。
 
 ## 6. 训练模块
 完成以上配置后，执行特征工程`python project_name\feature.py`。  

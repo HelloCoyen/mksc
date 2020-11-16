@@ -23,12 +23,7 @@ def make_workspace(name):
     with open(os.path.join(project, 'config', 'configuration.ini'), "r", encoding='utf-8') as f:
         content = f.read()
     with open(os.path.join(project, 'config', 'configuration.ini'), "w", encoding='utf-8') as f:
-        content = content % (os.path.join(os.getcwd(), name),
-                             os.path.join(os.getcwd(), name, "data"),
-                             os.path.join(os.getcwd(), name, "data"),
-                             os.path.join(os.getcwd(), name, "result"),
-                             os.path.join(os.getcwd(), name, "log"),
-                             os.path.join(os.getcwd(), name, "result"))
+        content = content % (os.path.join(os.getcwd(), name))
         f.write(content)
 
 def main():

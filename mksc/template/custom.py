@@ -44,7 +44,7 @@ class Custom(object):
         """
         feature_tmp = feature.copy()
         # 构造衍生变量
-        # 日期变量处理
+        # 日期变量处理，此处无需丢弃变量
         return feature_tmp
 
 class CustomModel(object):
@@ -59,6 +59,19 @@ class CustomModel(object):
 
     def predict_proba(self, x):
         return
+
+class CustomApply(object):
+    """
+    自定义应用集处理
+    """
+    def load_data(self):
+        pass
+
+    def load_model(self):
+        pass
+
+    def predict(self):
+        pass
 
 
 if __name__ == "__main__":

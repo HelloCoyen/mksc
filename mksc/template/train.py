@@ -24,14 +24,7 @@ def main(**kwargs):
 
     # 自定义特征组合模块
     feature = Custom.feature_combination(feature)
-
-    # One-Hot编码
-    category_var = feature.select_dtypes(include=['object']).columns
-    feature[category_var].fillna("NA", inplace=True)
-    if not feature[category_var].empty:
-        feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-    feature.drop(category_var, axis=1, inplace=True)
-    feature = feature[feature_engineering['feature_selected']]
+    feature.drop(datetime_var,  axis=1, inplace=True)
 
     # 数据处理
     feature = transform(feature, feature_engineering)
