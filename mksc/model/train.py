@@ -17,6 +17,7 @@ def training(feature, label, model_name=None, **kwargs):
         model = model_choose(model_name, **kwargs)
         scores = cross_validate(model, x_train, y_train, cv=5, scoring='roc_auc')
         result[model_name] = scores['test_score'].mean()
+        print(f"Model-{model_name}: roc_auc: {result[model_name]:.2f}")
         model.fit(x_train, y_train)
     else:
         for m in model_mapper:
@@ -57,6 +58,7 @@ def training(feature, label, model_name=None, **kwargs):
 
     spe_train = recall_score(y_train, predict_train, pos_label=0)
     spe_test = recall_score(y_test, predict_test, pos_label=0)
+    print(f"K-S 值： {ks_score}")
     print(f'模型准确率：训练 {acu_train * 100:.2f}%	测试 {acu_test * 100:.2f}%')
     print(f'正例覆盖率：训练 {sen_train * 100:.2f}%	测试 {sen_test * 100:.2f}%')
     print(f'负例覆盖率：训练 {spe_train * 100:.2f}%	测试 {spe_test * 100:.2f}%')

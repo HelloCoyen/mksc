@@ -37,12 +37,12 @@ def main(report=True, apply=True):
         sample.corr().to_excel(writer, sheet_name="相关系数", index=False)
         (sample
             .select_dtypes(exclude=['object', 'datetime'])
-            .descibe()
-            .to_excel(writer, sheet_name="数值数据汇总", index=False))
+            .describe()
+            .to_excel(writer, sheet_name="数值数据汇总"))
         (sample
             .select_dtypes(include=['object', 'datetime'])
-            .descibe()
-            .to_excel(writer, sheet_name="分类数据汇总", index=False))
+            .describe()
+            .to_excel(writer, sheet_name="分类数据汇总"))
 
     # 保存分析报告
     if report and (not sample.empty):
@@ -56,4 +56,4 @@ def main(report=True, apply=True):
 
 
 if __name__ == '__main__':
-    main(report=True, apply=True)
+    main(report=False, apply=False)

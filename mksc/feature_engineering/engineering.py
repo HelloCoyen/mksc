@@ -95,7 +95,6 @@ class FeatureEngineering(object):
 
         # 逐步回归筛选
         feature_selected = seletction.stepwise_selection(feature, label)
-        feature = feature[feature_selected]
 
         # 中间结果保存
         result = {"missing_value": missing_value,
@@ -117,6 +116,6 @@ class FeatureEngineering(object):
         with open('result/feature_engineering.pickle', 'wb') as f:
             f.write(pickle.dumps(result))
 
-        with open('result/apply_sql.txt', 'wb') as f:
+        with open('result/apply_sql.txt', 'w') as f:
             sql = ",".join(result["feature_selected"])
             f.write(f"select {sql} from ")

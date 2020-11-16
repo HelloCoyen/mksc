@@ -12,7 +12,8 @@ def main():
     tag = input(">>> step 2: EDA过程跳过请输入【Y/y】")
     if tag.upper() != "Y":
         report = input(">>> 报告生成将花费大量时间，回车确认取消报告，任意键回车继续生成")
-        eda.main(report)
+        apply = input(">>> 应用集规模过大将无法一次读取保存，回车确认取消读取保存，任意键回车继续生成")
+        eda.main(report, apply)
 
     tag = input(">>> step 3: 请完成特征配置variable_type.csv以及自定义配置custom.py，完成请输入【Y/y】，跳过特征过程请输入【S/s】")
     if tag.upper() == "Y":

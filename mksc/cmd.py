@@ -11,7 +11,7 @@ def make_workspace(name):
     """
 
     if os.path.exists(name):
-        return f"Folder [{name}] is exists already, Please check out the work path"
+        raise TypeError(f"Folder [{name}] is exists already, Please check out the work path")
     else:
         templates = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'template')
         project = os.path.join(os.getcwd(), name)

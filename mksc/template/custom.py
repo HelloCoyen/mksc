@@ -45,6 +45,9 @@ class Custom(object):
         feature_tmp = feature.copy()
         # 构造衍生变量
         # 日期变量处理，此处无需丢弃变量
+        date_var = ['day', 'dayofweek', 'dayofyear', 'days_in_month', 'is_leap_year', 'is_month_end',
+                    'is_month_start', 'is_quarter_end', 'is_quarter_start', 'is_year_end',
+                    'is_year_start', 'month', 'quarter', 'week', 'weekday', 'weekofyear', 'year']
         return feature_tmp
 
 class CustomModel(object):
