@@ -30,6 +30,8 @@ def training(feature, label, model_name=None, **kwargs):
     else:
         for m in model_mapper:
             model = model_choose(m)
+            if m == 'svm':
+                model = model_choose(m, probability=True)
             scores = cross_validate(model, x_train, y_train, cv=5, scoring='roc_auc')
             result[m] = scores['test_score'].mean()
             print(f"Model-{m}: roc_auc: {result[m]:.2f}")
