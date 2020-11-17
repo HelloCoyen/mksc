@@ -1,4 +1,4 @@
-from statsmodels.iolib.smpickle import load_pickle, save_pickle
+from statsmodels.iolib.smpickle import load_pickle
 import pandas as pd
 import configparser
 from datetime import date

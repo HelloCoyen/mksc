@@ -3,13 +3,12 @@ import pandas as pd
 from mksc.feature_engineering import seletction
 from mksc.feature_engineering import values
 from mksc.feature_engineering import binning
-from imblearn.over_sampling import SMOTE
 
 
 class FeatureEngineering(object):
 
     def __init__(self, feature, label, missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
-                 abnormal_threshold=0.05, correlation_threshold=0.7):
+                 abnormal_threshold=0.05, correlation_threshold=0.7, variance_threshold=0.05):
         self.feature = feature
         self.label = label
         self.missing_threshold = missing_threshold
@@ -17,6 +16,7 @@ class FeatureEngineering(object):
         self.unique_threshold = unique_threshold
         self.abnormal_threshold = abnormal_threshold
         self.correlation_threshold = correlation_threshold
+        self.variance_threshold = variance_threshold
         self.threshold = {"missing_threshold": self.missing_threshold,
                           "distinct_threshold": self.distinct_threshold,
                           "unique_threshold": self.unique_threshold,
@@ -39,8 +39,7 @@ class FeatureEngineering(object):
         9. 相关性筛选
         10. woe转化
         11. One-Hot
-        12. XXX 降维：逐步回归筛选
-        13. XXX 采样
+        12. TODO 降维
 
         Returns:
             feature: 已完成特征工程的数据框
@@ -49,6 +48,12 @@ class FeatureEngineering(object):
         feature = self.feature
         label = self.label
 
+        # 基于缺失率、唯一率、众数比例统计特征筛选
+        missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
+        distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
+        unique_value = seletction.get_unique_value(feature, self.unique_threshold)
+        feature.drop(set(missing_value['drop'] + distinct_value['drop'] + unique_value['drop']), axis=1, inplace=True)
+
         # One-Hot编码
         category_var = feature.select_dtypes(include=['object']).columns
         if not category_var.empty:
@@ -56,23 +61,18 @@ class FeatureEngineering(object):
             feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
             feature.drop(category_var, axis=1, inplace=True)
 
-        # 基于缺失率、唯一率、众数比例统计特征筛选
-        missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
-        distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
-        unique_value = seletction.get_unique_value(feature, self.unique_threshold)
-        feature.drop(set(missing_value['drop'] + distinct_value['drop'] + unique_value['drop']), axis=1, inplace=True)
-
         # 缺失值处理
         feature, missing_filling = values.fix_missing_value(feature, self.missing_threshold[1])
 
         # 极端值处理
         feature, abnormal_value = values.fix_abnormal_value(feature, self.abnormal_threshold)
 
+        # 标准化处理
+        feature, scale_result = values.fix_scaling(feature, self.variance_threshold)
+        feature.drop(scale_result['drop'], axis=1, inplace=True)
+
         # 正态化处理
         feature, standard_lambda = values.fix_standard(feature)
-
-        # 归一化处理
-        feature, scale_result = values.fix_scaling(feature)
 
         # 数值特征最优分箱，未处理的变量，暂时退出模型
         bin_result, iv_result, woe_result, woe_adjust_result = binning.tree_binning(label, feature)
@@ -89,12 +89,13 @@ class FeatureEngineering(object):
         # woe转化
         feature = binning.woe_transform(feature, woe_result, bin_result)
 
-        # 重采样
-        if label.sum()/len(label) < 0.1 or label.sum()/len(label) > 0.9:
-            feature, label = SMOTE().fit_sample(feature, label)
-
-        # 逐步回归筛选
-        feature_selected = seletction.stepwise_selection(feature, label)
+        # 降维
+        if feature.shape[1] > 300:
+            pass
+            # 重采样
+            # # 逐步回归筛选
+            # feature_selected = seletction.stepwise_selection(feature, label)
+        feature_selected = feature.columns
 
         # 中间结果保存
         result = {"missing_value": missing_value,
