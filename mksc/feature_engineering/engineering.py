@@ -58,7 +58,7 @@ class FeatureEngineering(object):
         category_var = feature.select_dtypes(include=['object']).columns
         if not category_var.empty:
             feature[category_var].fillna("NA", inplace=True)
-            feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+            feature = pd.concat([feature, pd.get_dummies(feature[category_var], prefix_sep="__")], axis=1)
             feature.drop(category_var, axis=1, inplace=True)
 
         # 缺失值处理
@@ -118,5 +118,6 @@ class FeatureEngineering(object):
             f.write(pickle.dumps(result))
 
         with open('result/apply_sql.txt', 'w') as f:
-            sql = ",".join(result["feature_selected"])
+            feature_selected = [v.split("__")[0] for v in result["feature_selected"]]
+            sql = ",".join(feature_selected)
             f.write(f"select {sql} from ")

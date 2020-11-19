@@ -8,7 +8,7 @@ def main(report=True, apply=True):
     探索性数据分析主程序入口
     Args:
         report: 是否保留分析报告，由于该报告对大数据集会占用大量时间，默认生成
-        apply: 是否读取应用集并保存pickle文件
+        apply: 是否读取应用集并保存pickle文件，此处注意应用集规模，默认生成
     生成以下四份文件：
         1、数据对象文件： “data/data.pickle”
         2、变量类型配置文件： “config/variable_type.csv”

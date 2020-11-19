@@ -17,6 +17,7 @@ def main(model_name, card=False, score=True):
     feature_engineering = load_pickle('result/feature_engineering.pickle')
     data = mksc.load_data("apply")
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
+    numeric_var, category_var, datetime_var = [list(set(t) & set(data.columns)) for t in (numeric_var, category_var, datetime_var)]
     feature = data[numeric_var + category_var + datetime_var]
     label = []
 
