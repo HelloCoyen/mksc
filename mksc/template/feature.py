@@ -23,7 +23,6 @@ def main(**kwargs):
 
     # 自定义特征组合
     feature = Custom.feature_combination(feature)
-    feature.drop(datetime_var,  axis=1, inplace=True)
 
     # 标准化特征工程
     fe = FeatureEngineering(feature, label, **kwargs)

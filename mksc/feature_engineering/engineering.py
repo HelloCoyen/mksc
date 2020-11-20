@@ -7,10 +7,12 @@ from mksc.feature_engineering import binning
 
 class FeatureEngineering(object):
 
-    def __init__(self, feature, label, missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
+    def __init__(self, feature, label,
+                 missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
                  abnormal_threshold=0.05, correlation_threshold=0.7, variance_threshold=0.05):
         self.feature = feature
         self.label = label
+
         self.missing_threshold = missing_threshold
         self.distinct_threshold = distinct_threshold
         self.unique_threshold = unique_threshold
@@ -22,6 +24,36 @@ class FeatureEngineering(object):
                           "unique_threshold": self.unique_threshold,
                           "abnormal_threshold": self.abnormal_threshold,
                           "correlation_threshold": self.correlation_threshold}
+
+        self.category_var = feature.select_dtypes(include=['object']).columns
+        self.numeric_var = feature.select_dtypes(exclude=['object', 'datetime64']).columns
+
+    def numeric_process(self, standard=True):
+        """
+        数值变量特征筛选
+        1. Filter：单变量筛选：
+            缺失率超过missing_threshold[0]=90%的剔除
+            唯一率超过distinct_threshold=90%的剔除
+            众数超过unique_threshold=90%的剔除
+        2. Transform: 数值变量转换
+            标准化：最大值最小值归一
+        """
+        feature = self.feature[self.numeric_var]
+
+        # 数值变量单变量筛选
+        missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
+        distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
+        unique_value = seletction.get_unique_value(feature, self.unique_threshold)
+        feature.drop(set(missing_value['drop'] + distinct_value['drop'] + unique_value['drop']), axis=1, inplace=True)
+
+        # 缺失处理，超过缺失5%比例的变量分箱处理
+        feature, missing_filling = values.fix_missing_value(feature, self.missing_threshold[1])
+
+        # 标准化：
+        feature, normalization_result = values.normalization(feature)
+
+        # 对数变换减少异常值
+        feature = values.logarithmetics(feature)
 
     def run(self):
         """
@@ -48,18 +80,21 @@ class FeatureEngineering(object):
         feature = self.feature
         label = self.label
 
-        # 基于缺失率、唯一率、众数比例统计特征筛选
-        missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
-        distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
-        unique_value = seletction.get_unique_value(feature, self.unique_threshold)
-        feature.drop(set(missing_value['drop'] + distinct_value['drop'] + unique_value['drop']), axis=1, inplace=True)
-
+        # 类别变量处理
         # One-Hot编码
         category_var = feature.select_dtypes(include=['object']).columns
         if not category_var.empty:
             feature[category_var].fillna("NA", inplace=True)
-            feature = pd.concat([feature, pd.get_dummies(feature[category_var], prefix_sep="__")], axis=1)
+            one_hot = pd.get_dummies(feature[category_var], prefix_sep="__")
+            feature = pd.concat([feature, one_hot], axis=1)
             feature.drop(category_var, axis=1, inplace=True)
+            category_var = one_hot.columns
+
+        # 单变量筛选：基于缺失率、唯一率、众数比例统计特征筛选
+        missing_value = seletction.get_missing_value(feature, self.missing_threshold[0])
+        distinct_value = seletction.get_distinct_value(feature, self.distinct_threshold)
+        unique_value = seletction.get_unique_value(feature, self.unique_threshold)
+        feature.drop(set(missing_value['drop'] + distinct_value['drop'] + unique_value['drop']), axis=1, inplace=True)
 
         # 缺失值处理
         feature, missing_filling = values.fix_missing_value(feature, self.missing_threshold[1])

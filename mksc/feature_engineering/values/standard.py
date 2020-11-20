@@ -1,4 +1,5 @@
 from scipy.stats import boxcox
+import math
 
 def fix_standard(feature):
     """
@@ -17,3 +18,17 @@ def fix_standard(feature):
         feature[c], lambda_ = boxcox(feature[c]+0.5)
         standard_lambda[c] = lambda_
     return feature, standard_lambda
+
+def logarithmetics(feature):
+    """
+    对数变化操作
+    Args:
+        feature: 待处理的数据框
+
+    Returns:
+        feature: 已处理数据框
+    """
+    numeric_var = feature.select_dtypes(exclude=['object', 'datetime']).columns
+    for c in numeric_var:
+        feature[c] = feature[c].apply(lambda x: math.log(x) if x else x)
+    return feature

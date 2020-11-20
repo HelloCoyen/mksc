@@ -1,6 +1,5 @@
-import numpy as np
 import pandas as pd
-import re
+
 
 class Custom(object):
     """
@@ -43,16 +42,40 @@ class Custom(object):
             feature_tmp: 已清洗特征数据框
         """
         feature_tmp = feature.copy()
-        # 构造衍生变量
-        # 日期变量处理，此处无需丢弃变量
+
+        # 构造衍生变量, 提取完后需要丢弃变量
+        # eg: feature_tmp['new_variable'] = feature_tmp['old_variable']
+        # eg: feature_tmp.drop('old_variable', axis=1, inplace=True)
+
+        # 日期变量处理, 提取完后需要丢弃变量
+        datetime_var = feature_tmp.select_dtypes(include='datetime64').columns
         date_var = ['day', 'dayofweek', 'dayofyear', 'days_in_month', 'is_leap_year', 'is_month_end',
                     'is_month_start', 'is_quarter_end', 'is_quarter_start', 'is_year_end',
                     'is_year_start', 'month', 'quarter', 'week', 'weekday', 'weekofyear', 'year']
+        for dv in datetime_var:
+            try:
+                """字段组合提取操作，避免特征表过大，应用时使用使用不同特征表,使用try-except语句"""
+                for v in date_var:
+                    feature_tmp[f"{dv}__{v}"] = eval(f"feature_tmp[{dv}].dt.{v}")
+                    feature_tmp[f"{dv}__{v}"] = feature_tmp[f"{dv}__{v}"].astype("object")
+            except KeyError:
+                pass
+        feature_tmp.drop(datetime_var, axis=1, inplace=True)
         return feature_tmp
 
-class CustomModel(object):
+    @staticmethod
+    def feature_adjust(feature, feature_srouce):
+        adjust_var = []
+        feature_tmp = feature[adjust_var]
+        """
+        adjust_var单独特征处理
+        """
+        new_feature = pd.concat([feature_tmp, feature_srouce[adjust_var]], axis=1)
+        return new_feature
+
+class CustomTrainModel(object):
     """
-    自定义模型, 必须包括以下三个方法
+    TODO自定义模型, 必须包括以下三个方法
     """
     def fit(self, x, y):
         pass
@@ -65,7 +88,7 @@ class CustomModel(object):
 
 class CustomApply(object):
     """
-    自定义应用集处理
+    TODO自定义应用集处理
     """
     def load_data(self):
         pass
