@@ -10,12 +10,10 @@ from mksc.model import model_mapper, model_choose
 
 def training(feature, label, model_name=None, **kwargs):
 
-    print(f"样本比例：label.sum()/len(label) ")
+    print(f"样本比例：{label.sum()/len(label)}")
     # 重采样
-    if "resample_threshold" in kwargs.keys():
-        if (label.sum()/len(label) < kwargs["resample_threshold"]
-                or label.sum()/len(label) > 1 - kwargs["resample_threshold"]):
-            feature, label = SMOTE().fit_sample(feature, label)
+    if kwargs.get("resample", False):
+        feature, label = SMOTE().fit_sample(feature, label)
     # 数据集划分
     x_train, x_test, y_train, y_test = train_test_split(feature, label, test_size=0.2, random_state=0)
 

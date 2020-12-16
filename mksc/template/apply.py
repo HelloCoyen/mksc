@@ -9,8 +9,10 @@ from mksc.feature_engineering import preprocess
 from mksc.feature_engineering import scoring
 from mksc.feature_engineering import transform
 from custom import Custom
+import argparse
 
-def main(model_name, card=False, score=True):
+
+def main(model_name, card=False, score=True, remote=False):
     # 数据、模型加载
     model, threshold = load_pickle(f'result/{model_name}.pickle')
 
@@ -31,8 +33,8 @@ def main(model_name, card=False, score=True):
 
     # 自定义特征组合模块
     feature = Custom.feature_combination(feature)
-    feature.drop(datetime_var, axis=1, inplace=True)
 
+    feature = feature[feature_engineering['feature_selected']]
     # 数据处理
     feature = transform(feature, feature_engineering)
 
@@ -59,11 +61,14 @@ def main(model_name, card=False, score=True):
 
     # 结果保存
     res['load_date'] = str(date.today())
-    mksc.save_result(res, remote=True)
-    mksc.save_result(res, filename="apply_result.csv")
+    mksc.save_result(res, filename="apply_result.csv", remote=remote)
 
 
 if __name__ == '__main__':
-    import sys
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
+    args = argparse.ArgumentParser()
+    args.add_argument("-m", "--model", type=str, help="模型选择，默认自动选择最优")
+    args.add_argument("-c", "--card", type=bool, default=False, help="模型选择，默认自动选择最优")
+    args.add_argument("-s", "--score", type=bool, default=True, help="模型选择，默认自动选择最优")
+    args.add_argument("-r", "--remote", type=bool, default=False,  help="模型选择，默认自动选择最优")
+    accepted = vars(args.parse_args())
+    main(model_name=accepted['model'], crad=accepted['crad'], score=accepted['score'], remote=accepted['remote'])

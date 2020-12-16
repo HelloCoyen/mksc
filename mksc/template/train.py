@@ -1,10 +1,10 @@
 from statsmodels.iolib.smpickle import load_pickle
-import pandas as pd
 import mksc
 from mksc.model import training
 from mksc.feature_engineering import preprocess
 from mksc.feature_engineering import transform
 from custom import Custom
+import argparse
 
 def main(**kwargs):
 
@@ -24,18 +24,17 @@ def main(**kwargs):
 
     # 自定义特征组合模块
     feature = Custom.feature_combination(feature)
-    feature.drop(datetime_var,  axis=1, inplace=True)
-
+    
+    feature = feature[feature_engineering['feature_selected']]
     # 数据处理
     feature = transform(feature, feature_engineering)
 
     # 模型训练
     training(feature, label, **kwargs)
 
-
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 2:
-        main(model_name=sys.argv[1])
-    else:
-        main()
+    args = argparse.ArgumentParser()
+    args.add_argument("-m", "--model", type=str, help="模型选择，默认自动选择最优")
+    args.add_argument("-r", "--resample", type=bool, help="是否使用重采样，默认不采样")
+    accepted = vars(args.parse_args())
+    main(model_name=accepted['model'], resample=accepted['resample'])

@@ -5,13 +5,13 @@ import pandas as pd
 
 def transform(feature, feature_engineering):
 
-    # One-Hot编码
-    category_var = feature.select_dtypes(include=['object']).columns
-    feature[category_var].fillna("NA", inplace=True)
-    if not feature[category_var].empty:
-        feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
-    feature.drop(category_var, axis=1, inplace=True)
-    feature = feature[feature_engineering['feature_selected']]
+    # # One-Hot编码
+    # category_var = feature.select_dtypes(include=['object']).columns
+    # feature[category_var].fillna("NA", inplace=True)
+    # if not feature[category_var].empty:
+    #     feature = pd.concat([feature, pd.get_dummies(feature[category_var])], axis=1)
+    # feature.drop(category_var, axis=1, inplace=True)
+    # feature = feature[feature_engineering['feature_selected']]
 
     # 极端值处理
     abnormal_value = feature_engineering['abnormal_value']
@@ -34,11 +34,11 @@ def transform(feature, feature_engineering):
         feature.loc[:, c] = feature.loc[:, c].apply(lambda x: (x - mean)/std if x else x)
 
     # 正态化处理
-    standard_lambda = feature_engineering['standard_lambda']
-    for c in set(feature.columns) & set(standard_lambda.keys()):
-        _lambda = standard_lambda[c]
-        feature.loc[:, c] = feature.loc[:, c] + 0.5
-        feature.loc[:, c] = feature.loc[:, c].apply(lambda x: (x**_lambda - 1) / _lambda if _lambda > 0 else log(x))
+    # standard_lambda = feature_engineering['standard_lambda']
+    # for c in set(feature.columns) & set(standard_lambda.keys()):
+    #     _lambda = standard_lambda[c]
+    #     feature.loc[:, c] = feature.loc[:, c] + 0.5
+    #     feature.loc[:, c] = feature.loc[:, c].apply(lambda x: (x**_lambda - 1) / _lambda if _lambda > 0 else log(x))
 
     # woe转化
     woe_result = feature_engineering['woe_result']

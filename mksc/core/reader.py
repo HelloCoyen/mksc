@@ -17,6 +17,11 @@ def file(filename):
         print("Wrong Data Type")
 
 def config():
+    """
+    读取项目配置文件/config/configuration.ini
+    Returns:
+        cfg: 配置参数对象
+    """
     cfg = configparser.ConfigParser()
     cfg.read(os.path.join(os.getcwd(), 'config', 'configuration.ini'), encoding='utf_8_sig')
     return cfg

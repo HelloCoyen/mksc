@@ -7,7 +7,9 @@ def load_data(mode='all', local=True):
     """
     加载配置文件指定数据源，返回数据
     Args:
-        mode: 数据集读取类别。“all”: 读取带标签的全部数据集； “apply": 读取不带标签的数据集
+        mode: 数据集读取类别。
+            --“all”: 读取带标签的全部数据集
+            --“apply": 读取不带标签的数据集
         local: 是否读取本地pickle对象文件
     Returns:
         data: 配置文件数据框
@@ -25,8 +27,8 @@ def load_data(mode='all', local=True):
     else:
         raise ValueError("Wrong mode type passed, only accepted [all/apply]")
 
-    if os.path.exists(os.path.join(cfg.get('PATH', 'WORK_DIR'), "data", f"{mode}.pickle")):
-        file = os.path.join(cfg.get('PATH', 'WORK_DIR'), "data", f"{mode}.pickle")
+    if os.path.exists(os.path.join(os.getcwd(), "data", f"{mode}.pickle")):
+        file = os.path.join(os.getcwd(), "data", f"{mode}.pickle")
 
     if local:
         data = reader.file(file)
@@ -53,6 +55,7 @@ def get_variable_type():
         category: 类别型变量列表
         datetime: 日期型变量列表
         label_name: 标签列
+        id: 唯一标识列
     """
     variable_type = pd.read_csv("config/variable_type.csv", encoding='gbk')
     label_var = variable_type[variable_type.iloc[:, 2] == 'label']
