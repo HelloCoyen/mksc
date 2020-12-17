@@ -2,6 +2,8 @@ import sys
 import os
 import shutil
 
+__version__ = '1.1.16'
+
 def make_workspace(name):
     """
     创建项目的工作目录与脚本文件
@@ -9,7 +11,7 @@ def make_workspace(name):
     Args:
         name: 项目名
     """
-
+    name = f'{name}_{__version__}'
     if os.path.exists(name):
         raise TypeError(f"Folder [{name}] is exists already, Please check out the work path")
     else:
@@ -19,12 +21,6 @@ def make_workspace(name):
 
     os.mkdir(os.path.join(os.getcwd(), name, 'result'))
     os.mkdir(os.path.join(os.getcwd(), name, 'data'))
-
-    with open(os.path.join(project, 'config', 'configuration.ini'), "r", encoding='utf-8') as f:
-        content = f.read()
-    with open(os.path.join(project, 'config', 'configuration.ini'), "w", encoding='utf-8') as f:
-        content = content % (os.path.join(os.getcwd(), name))
-        f.write(content)
 
 def main():
     """

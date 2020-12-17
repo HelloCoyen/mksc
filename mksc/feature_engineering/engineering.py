@@ -9,7 +9,7 @@ class FeatureEngineering(object):
 
     def __init__(self, feature, label,
                  missing_threshold=(0.9, 0.05), distinct_threshold=0.9, unique_threshold=0.9,
-                 abnormal_threshold=0.05, correlation_threshold=0.7, variance_threshold=0.05):
+                 abnormal_threshold=0.05, correlation_threshold=0.7, variance_threshold=0.05, **kwargs):
         self.feature = feature
         self.label = label
         self.missing_threshold = missing_threshold
@@ -23,7 +23,9 @@ class FeatureEngineering(object):
                           "unique_threshold": self.unique_threshold,
                           "abnormal_threshold": self.abnormal_threshold,
                           "correlation_threshold": self.correlation_threshold}
+        self.kwargs = kwargs
         print(self.threshold)
+        print(self.kwargs)
 
     def run(self):
         """
@@ -95,7 +97,12 @@ class FeatureEngineering(object):
         print("单变量预处理: WOE转换")
         feature = binning.woe_transform(feature, woe_result, bin_result)
 
-        feature_selected = feature.columns
+        # 逐步回归
+        if self.kwargs.get("stepwise", False):
+            feature_selected = seletction.model.stepwise_selection(feature, label)
+        else:
+            # TODO 降维
+            feature_selected = feature.columns
 
         # 中间结果保存
         result = {"missing_value": missing_value,
@@ -114,7 +121,7 @@ class FeatureEngineering(object):
                   "cor_drop": cor_drop,
                   "feature_selected": feature_selected
                   }
-        print(">>> 特种工程简单报告:")
+        print(">>> 特征工程简单报告:")
         print(f"    缺失值过滤列数量:{missing_value['drop_number']}")
         print(f"    唯一值过滤列数量:{distinct_value['drop_number']}")
         print(f"    众数值过滤列数量:{unique_value['drop_number']}")

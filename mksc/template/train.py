@@ -26,11 +26,13 @@ def main(**kwargs):
     feature = Custom.feature_combination(feature)
     
     feature = feature[feature_engineering['feature_selected']]
+
     # 数据处理
     feature = transform(feature, feature_engineering)
 
     # 模型训练
     training(feature, label, **kwargs)
+
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()

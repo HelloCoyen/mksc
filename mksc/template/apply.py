@@ -12,12 +12,12 @@ from custom import Custom
 import argparse
 
 
-def main(model_name, card=False, score=True, remote=False):
+def main(model_name, card=False, score=True, remote=False, local=False):
     # 数据、模型加载
     model, threshold = load_pickle(f'result/{model_name}.pickle')
 
     feature_engineering = load_pickle('result/feature_engineering.pickle')
-    data = mksc.load_data("apply")
+    data = mksc.load_data("apply", local=local)
     numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     numeric_var, category_var, datetime_var = [list(set(t) & set(data.columns)) for t in (numeric_var, category_var, datetime_var)]
     feature = data[numeric_var + category_var + datetime_var]
@@ -35,6 +35,7 @@ def main(model_name, card=False, score=True, remote=False):
     feature = Custom.feature_combination(feature)
 
     feature = feature[feature_engineering['feature_selected']]
+
     # 数据处理
     feature = transform(feature, feature_engineering)
 
@@ -43,7 +44,7 @@ def main(model_name, card=False, score=True, remote=False):
     res_prob = pd.DataFrame(model.predict_proba(feature), columns=['probability_0', "probability_1"])
     res_prob['res_odds'] = res_prob['probability_0'] / res_prob["probability_1"]
     res_prob['label_threshold'] = res_prob['probability_1'].apply(lambda x: 0 if x < threshold else 1)
-    res = pd.concat([data, feature, res_label, res_prob], axis=1)
+    res = pd.concat([data, res_label, res_prob], axis=1)
 
     if card and model_name == 'lr':
         # 转化评分
@@ -57,7 +58,7 @@ def main(model_name, card=False, score=True, remote=False):
         score = cfg.get('SCORECARD', 'score')
         pdo = cfg.get('SCORECARD', 'pdo')
         a, b = scoring.make_score(odds, score, pdo)
-        res['Score'] = res_prob['res_odds'].apply(lambda x: a + b * log(float(x)))
+        res['score'] = res_prob['res_odds'].apply(lambda x: a + b * log(float(x)))
 
     # 结果保存
     res['load_date'] = str(date.today())
@@ -66,9 +67,14 @@ def main(model_name, card=False, score=True, remote=False):
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
-    args.add_argument("-m", "--model", type=str, help="模型选择，默认自动选择最优")
-    args.add_argument("-c", "--card", type=bool, default=False, help="模型选择，默认自动选择最优")
-    args.add_argument("-s", "--score", type=bool, default=True, help="模型选择，默认自动选择最优")
-    args.add_argument("-r", "--remote", type=bool, default=False,  help="模型选择，默认自动选择最优")
+    args.add_argument("m", "model", type=str, help=r"模型选择：xgb\lr\svm\rf\gbdt\lgb\dt")
+    args.add_argument("-c", "--card", type=bool, default=False, help="是否制作评分卡")
+    args.add_argument("-s", "--score", type=bool, default=True, help="是否转换成评分")
+    args.add_argument("-r", "--remote", type=bool, default=False,  help="是否保存远程")
+    args.add_argument("-l", "--local", type=bool, default=False,  help="是否读取远程")
     accepted = vars(args.parse_args())
-    main(model_name=accepted['model'], crad=accepted['crad'], score=accepted['score'], remote=accepted['remote'])
+    main(model_name=accepted['model'],
+         crad=accepted['card'],
+         score=accepted['score'],
+         remote=accepted['remote'],
+         local=accepted['local'])

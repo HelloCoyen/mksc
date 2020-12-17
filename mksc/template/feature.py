@@ -10,7 +10,7 @@ def main(**kwargs):
     """
     # 加载数据、变量类型划分、特征集与标签列划分
     data = mksc.load_data()
-    numeric_var, category_var, datetime_var, label_var, identifier_var = preprocess.get_variable_type()
+    numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = data[label_var]
 
