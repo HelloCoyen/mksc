@@ -1,5 +1,7 @@
-from scipy.stats import boxcox
 import math
+
+from scipy.stats import boxcox
+
 
 def fix_standard(feature):
     """

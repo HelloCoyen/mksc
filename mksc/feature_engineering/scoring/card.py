@@ -1,6 +1,8 @@
-from math import log
-import pandas as pd
 import pickle
+from math import log
+
+import pandas as pd
+
 
 def make_score(odds, score, pdo):
     # odds = P_0 / P_1

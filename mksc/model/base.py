@@ -1,10 +1,10 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from xgboost.sklearn import XGBClassifier
 from lightgbm import LGBMClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from xgboost.sklearn import XGBClassifier
 
 model_mapper = {"lr": LogisticRegression,
                 "dt": DecisionTreeClassifier,

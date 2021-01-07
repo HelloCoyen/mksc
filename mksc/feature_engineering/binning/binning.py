@@ -1,7 +1,9 @@
-from math import log
 from copy import deepcopy
+from math import log
+
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
+
 
 def tree_binning(label, feature):
     """

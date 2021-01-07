@@ -1,5 +1,6 @@
-import pandas as pd
+﻿import pandas as pd
 import statsmodels.api as sm
+from numpy.linalg.linalg import LinAlgError
 
 
 def stepwise_selection(x, y, threshold_in=0.01, threshold_out=0.05):
@@ -16,15 +17,18 @@ def stepwise_selection(x, y, threshold_in=0.01, threshold_out=0.05):
         included：特征名称列表
     """
     included = []
-    numeric_var = x.select_dtypes(exclude=['object', 'datetime']).columns
+    numeric_var = x.select_dtypes(exclude=['object', 'datetime64[ns]']).columns
     while True:
         changed = False
         # forward step
         excluded = list(set(numeric_var)-set(included))
         new_pval = pd.Series(index=excluded)
         for new_column in excluded:
-            model = sm.Logit(y, sm.add_constant(pd.DataFrame(x[included+[new_column]]))).fit()
-            new_pval[new_column] = model.pvalues[new_column]
+            try:
+                model = sm.Logit(y, sm.add_constant(pd.DataFrame(x[included+[new_column]]))).fit()
+                new_pval[new_column] = model.pvalues[new_column]
+            except LinAlgError:
+                continue
         best_pval = new_pval.min()
         if best_pval < threshold_in:
             best_feature = new_pval.idxmin()

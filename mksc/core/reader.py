@@ -1,7 +1,9 @@
-from statsmodels.iolib.smpickle import load_pickle
-import pandas as pd
-import os
 import configparser
+import os
+
+import pandas as pd
+from statsmodels.iolib.smpickle import load_pickle
+
 
 def file(filename):
     if '.csv' in filename:

@@ -1,14 +1,17 @@
-from statsmodels.iolib.smpickle import load_pickle
-from mksc.feature_engineering import scoring
 import configparser
 import os
 
+from statsmodels.iolib.smpickle import load_pickle
+
+from mksc.feature_engineering import scoring
+
+
 def main():
     """
-    评分卡制作主程序入口
+    特征评分卡制作主程序入口
     """
     cfg = configparser.ConfigParser()
-    cfg.read(os.path.join(os.getcwd(), 'config', 'configuration.ini'), encoding='utf_8_sig')
+    cfg.read(os.path.join(os.getcwd(), 'template/config', 'configuration.ini'), encoding='utf_8_sig')
     odds = cfg.get('SCORECARD', 'ODDS')
     score = cfg.get('SCORECARD', 'SCORE')
     pdo = cfg.get('SCORECARD', 'PDO')

@@ -1,13 +1,15 @@
 import numpy as np
 
-def fix_abnormal_value(feature, threshold=0.05):
+def fix_abnormal_value(feature, threshold=0.05, method='boundary'):
     """
     修正数据框中的数值型变量中的异常值
 
     Args:
         feature: 待修正的数据框
         threshold: 异常值替换阈值
-
+        method: 补值方法
+            -- boundary：缩放到边界
+            -- drop: 丢弃
     Returns:
         feature: 已处理数据框
         abnormal_value: 异常值统计结果
@@ -29,5 +31,8 @@ def fix_abnormal_value(feature, threshold=0.05):
                                        'min': min_}
         if abnormal_value_rate <= threshold:
             abnormal_value['replace'].append(c)
-            feature.loc[:, c] = feature.loc[:, c].apply(lambda x: x if (x < max_) & (x > min_) else np.nan)
+            if method == "drop":
+                feature.loc[:, c] = feature.loc[:, c].apply(lambda x: x if (x < max_) & (x > min_) else np.nan)
+            else:
+                feature.loc[:, c] = feature.loc[:, c].apply(lambda x: max_ if x > max_ else(min_ if x < min_ else x))
     return feature, abnormal_value

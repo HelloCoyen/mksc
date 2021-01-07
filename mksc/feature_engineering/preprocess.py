@@ -1,7 +1,10 @@
+import os
+
 import numpy as np
 import pandas as pd
-import os
+
 from mksc.core import reader
+
 
 def load_data(mode='all', local=True):
     """

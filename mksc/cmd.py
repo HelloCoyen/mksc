@@ -1,8 +1,8 @@
-import sys
 import os
 import shutil
+import sys
 
-__version__ = '1.1.16'
+__version__ = '1.2.1'
 
 def make_workspace(name):
     """

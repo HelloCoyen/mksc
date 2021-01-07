@@ -1,5 +1,7 @@
-from mksc.core import reader
 import os
+
+from mksc.core import reader
+
 
 def save_result(data, filename=None, remote=False):
     cfg = reader.config()

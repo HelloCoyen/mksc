@@ -1,15 +1,17 @@
 import pandas as pd
-
+import numpy as np
 
 class Custom(object):
     """
     自定义预处理类函数封装
     """
     def __init__(self):
-        pass
+        self.cleaned_var = []
+        self.used_var = []
+        self.adjust_var = []
+        self.adjust_bins = []
 
-    @staticmethod
-    def clean_data(feature, label):
+    def clean_data(self, feature, label):
         """
         基于单元格与行操作的数据清洗
 
@@ -23,18 +25,15 @@ class Custom(object):
         """
         feature_tmp = feature.copy()
         label_tmp = label.copy()
-        # ------------------------------------------ 
-        # 默认值处理
-        # 单位处理
-        # 正则处理
-        # 业务缺失值补充
-        # 业务异常值剔除
-        # eg. 自定义代码
+        # ------------------------------------------
+        # 自定义清洗, 每次使用均需保存变量名
+        # eg.
+        #     feature_tmp['variable'] = feature_tmp['variable']
+        #     self.cleaned_var.append('old_variable')
         # ------------------------------------------
         return feature_tmp, label_tmp
 
-    @staticmethod
-    def feature_combination(feature):
+    def feature_combination(self, feature):
         """
         基于列操作的数据清洗与特征构造
 
@@ -44,15 +43,16 @@ class Custom(object):
         Returns:
             feature_tmp: 已清洗特征数据框
         """
-        feature_tmp = feature.copy()    
+        feature_tmp = feature.copy()
         # ------------------------------------------
-        # 构造衍生变量, 提取完后需要丢弃变量
+        # 构造衍生变量, 每次使用均需保存变量名
         # eg: feature_tmp['new_variable'] = feature_tmp['old_variable']
-        # eg: feature_tmp.drop('old_variable', axis=1, inplace=True)
-        # 日期变量处理, 提取完后需要丢弃变量
-        # eg. 自定义代码
+        #     feature_tmp.drop('old_variable', axis=1, inplace=True)
+        #     self.used_var.append('old_variable')
         # ------------------------------------------
-        datetime_var = feature_tmp.select_dtypes(include='datetime64').columns
+
+        # 日期变量处理, 提取完后需要丢弃变量
+        datetime_var = feature_tmp.select_dtypes(include='datetime64[ns]').columns
         date_var = ['day', 'dayofweek', 'dayofyear', 'days_in_month', 'is_leap_year', 'is_month_end',
                     'is_month_start', 'is_quarter_end', 'is_quarter_start', 'is_year_end',
                     'is_year_start', 'month', 'quarter', 'week', 'weekday', 'weekofyear', 'year']
@@ -62,53 +62,47 @@ class Custom(object):
                 feature_tmp[f"{dv}__{v}"] = feature_tmp[f"{dv}__{v}"].astype("object")
         feature_tmp.drop(datetime_var, axis=1, inplace=True)
 
-        # 分类变量one-hot处理，处理完城后需要丢弃变量
+        # 分类变量one-hot处理，处理完成后需要丢弃变量
         category_var = feature_tmp.select_dtypes(include=['object']).columns
         if not category_var.empty:
             feature_tmp[category_var].fillna("NA", inplace=True)
             one_hot = pd.get_dummies(feature_tmp[category_var], prefix_sep="__")
+            one_hot.columns = list(map(lambda x: x.split(".")[0], one_hot.columns))
             feature_tmp = pd.concat([feature_tmp, one_hot], axis=1)
         feature_tmp.drop(category_var, axis=1, inplace=True)
         return feature_tmp
 
-    @staticmethod
-    def feature_adjust(feature, feature_srouce):
+    def feature_adjust(self, feature):
         """
-        TODO
+        调整特征表
+        Args:
+            feature: 原始特征表
+
+        Returns:
+            feature_tmp: 调整后的特征数据框
         """
-        adjust_var = []
-        feature_tmp = feature[adjust_var]
+        # ------------------------------------------
+        # 后期调整的时候控制某些特征不进入训练，只能减少特征
+        # ------------------------------------------
+        self.adjust_var = []
+        feature_tmp = feature[self.adjust_var]
+        return feature_tmp
+
+    def show(self):
+        """打印全部属性"""
+        print(f"本次自定义过程清洗的特征：{self.cleaned_var}")
+        print(f"本次自定义过程组合的特征：{self.used_var}")
+        print(f"本次自定义过程调整的特征：{self.adjust_var}")
+
+    def model(self):
         """
-        adjust_var单独特征处理
+        自定义模型类
         """
-        new_feature = pd.concat([feature_tmp, feature_srouce[adjust_var]], axis=1)
-        return new_feature
-
-class CustomTrainModel(object):
-    """
-    TODO自定义模型, 必须包括以下三个方法
-    """
-    def fit(self, x, y):
-        pass
-
-    def predict(self, x):
-        return
-
-    def predict_proba(self, x):
-        return
-
-class CustomApply(object):
-    """
-    TODO自定义应用集处理
-    """
-    def load_data(self):
-        pass
-
-    def load_model(self):
-        pass
-
-    def predict(self):
-        pass
+        # ------------------------------------------
+        # eg.
+        #   from statsmodels.api import Logit
+        #   return Logit
+        # ------------------------------------------
 
 
 if __name__ == "__main__":
@@ -117,10 +111,9 @@ if __name__ == "__main__":
     from mksc.feature_engineering import preprocess
     # 加载数据、变量类型划分、特征集与标签列划分
     data = mksc.load_data()
-    numeric_var, category_var, datetime_var, label_var, identifier_var = preprocess.get_variable_type()
+    numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = data[label_var]
-    identifier = data[identifier_var]
     try:
         feature[numeric_var] = feature[numeric_var].astype('float')
         feature[category_var] = feature[category_var].astype('object')
