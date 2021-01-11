@@ -9,6 +9,7 @@ from mksc.core.saver import save_result
 from mksc.utils import load_data, get_variable_type
 from mksc.feature.binning import tree_binning
 from mksc.feature import transform
+from mksc.score.card import make_score
 from custom import Custom
 
 def main(model_name, mode, read_local, score=False, save_remote=False):
@@ -53,7 +54,7 @@ def main(model_name, mode, read_local, score=False, save_remote=False):
         odds = cfg.get('SCORECARD', 'odds')
         score = cfg.get('SCORECARD', 'score')
         pdo = cfg.get('SCORECARD', 'pdo')
-        a, b = score.make_score(odds, score, pdo)
+        a, b = make_score(odds, score, pdo)
         res['score'] = res_prob['res_odds'].apply(lambda x: a + b * log(float(x)))
         bins = tree_binning(res[label_var], res['score'].to_frame())[0]["result"]["score"] if mode == "train" else cs.adjust_bins
         if bins:
@@ -76,8 +77,9 @@ if __name__ == '__main__':
     args.add_argument("--mode", type=str, required=True, help="预测模式")
     args.add_argument("-m", "--model", type=str, required=True, help=r"模型选择：xgb\lr\svm\rf\gbdt\lgb\dt\自定义")
     args.add_argument("--score", action="store_true", help="有该参数表示概率转换成得分")
-    args.add_argument("--remote", action="store_true", help="有该参数表示保存远程")
+    args.add_argument("--save_remote", action="store_true", help="有该参数表示保存远程")
     args.add_argument("--read_local", action="store_true",  help="有该参数表示读取本地")
     accepted = vars(args.parse_args())
-    main(model_name=accepted['model'], dataset=accepted['dataset'], card=accepted['card'],
-         score=accepted['score'], remote=accepted['remote'], local=accepted['local'])
+    main(model_name=accepted['model'], mode=accepted['mode'],
+         score=accepted['score'], save_remote=accepted['save_remote'], read_local=accepted['read_local'])
+
