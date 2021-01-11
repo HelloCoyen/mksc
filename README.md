@@ -13,7 +13,7 @@ mksc project_name
 ```
 
 ## 3. 修改项目配置
-修改`project_name\config\configuration.ini`文件，进行项目配置
+修改`project_name\get_config\configuration.ini`文件，进行项目配置
 
 
 ## 4. 探索性数据分析
@@ -21,10 +21,10 @@ mksc project_name
 生成：  
 * 数据报告： `project_name\result\report.html`  
 * 抽样数据： `project_name\result\sample.xlsx`
-* 特征配置： `project_name\config\variable_type.csv`
+* 特征配置： `project_name\get_config\variable_type.csv`
 
 ## 5. 修改特征配置
-修改`project_name\config\variable_type.csv`文件，进行特征配置，配置列说明如下：  
+修改`project_name\get_config\variable_type.csv`文件，进行特征配置，配置列说明如下：  
 * __isSave__：变量是否保留进行特征工程
     - 取值：0-不保留；1-保留
 * __Type__: 变量类型

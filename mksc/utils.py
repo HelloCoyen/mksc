@@ -3,38 +3,40 @@ import os
 import numpy as np
 import pandas as pd
 
-from mksc.core import reader
+from mksc import read_data_file
+from mksc import config
 
-
-def load_data(mode='all', local=True):
+def load_data(mode, read_local=True):
     """
     加载配置文件指定数据源，返回数据
     Args:
         mode: 数据集读取类别。
-            --“all”: 读取带标签的全部数据集
-            --“apply": 读取不带标签的数据集
-        local: 是否读取本地pickle对象文件
+            --“train”: 读取带标签的训练数据集
+            --“predict": 读取不带标签的预测数据集
+        read_local: 是否读取本地pickle对象文件
     Returns:
         data: 配置文件数据框
     """
-    cfg = reader.config()
-    if mode == 'all':
-        mode = 'data'
-        sql = cfg.get('DATABASE', 'SQL')
-        file = cfg.get('PATH', 'DATA_FILE')
-        engine = cfg.get('DATABASE', 'ENGINE_URL')
-    elif mode == "apply":
-        sql = cfg.get('DATABASE', 'APPLY_SQL')
-        file = cfg.get('PATH', 'APPLY_DATA_FILE')
-        engine = cfg.get('DATABASE', 'APPLY_ENGINE_URL')
+    assert mode in ["train", "predict"], "mode only accept [train/predict]"
+    if mode == 'train':
+        sql = config.get('DATABASE', 'TRAIN_SQL')
+        filename = config.get('PATH', 'TRAIN_DATASET')
+        engine = config.get('DATABASE', 'TRAIN_ENGINE_URL')
+    elif mode == "predict":
+        sql = config.get('DATABASE', 'PREDICT_SQL')
+        filename = config.get('PATH', 'PREDICT_DATASET')
+        engine = config.get('DATABASE', 'PREDICT_ENGINE_URL')
     else:
-        raise ValueError("Wrong mode type passed, only accepted [all/apply]")
+        raise ValueError("Wrong mode type passed, only accepted [train/predict]")
+
+    assert sql or filename, "远程路径与本地路径至少需要提供一个"
 
     if os.path.exists(os.path.join(os.getcwd(), "data", f"{mode}.pickle")):
-        file = os.path.join(os.getcwd(), "data", f"{mode}.pickle")
+        print(f"Warning: 存在本地相应文件{mode}.pickle, 将直接读取该文件")
+        filename = os.path.join(os.getcwd(), "data", f"{mode}.pickle")
 
-    if local:
-        data = reader.file(file)
+    if read_local:
+        data = read_data_file(filename)
     else:
         data = pd.read_sql(sql, engine)
 

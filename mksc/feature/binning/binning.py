@@ -25,14 +25,13 @@ def tree_binning(label, feature):
         woe_result: WOE值统计结果
         woe_adjust_result: 需要调整分箱的结果
     """
-    numeric_var = feature.select_dtypes(exclude=['object', 'datetime']).columns
     label_name = label.name
     y_t = label[label.values == 1].count()
     n_t = label[label.values == 0].count()
     bin_result = {'result': {}, 'error': []}
     iv_result = {}
     woe_result = {}
-    for c in numeric_var:
+    for c in feature.columns:
         temp = pd.concat([feature[c], label], axis=1)
         # 统计空值分布
         binning_data_na = temp[temp[c].isna()]

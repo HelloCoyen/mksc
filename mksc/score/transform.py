@@ -1,5 +1,14 @@
 
 def transform_score(data, score_card):
+    """
+    特征映射回分值
+    Args:
+        data: 特征表
+        score_card: 评分卡
+
+    Returns:
+        返回转化后的得分
+    """
     base_score = score_card[score_card['Bins'] == '-']['Score'].values[0]
     data['Score'] = base_score
     for i in range(len(data)):

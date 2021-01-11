@@ -2,10 +2,20 @@
 
 import numpy as np
 
-from mksc.feature_engineering import binning
+from mksc.feature import binning
 
 
 def transform(feature, feature_engineering):
+    """
+    特征按照特征工程中保存的结果进行转化
+    Args:
+        feature: 待转化的特征表
+        feature_engineering:特征工程元数据表
+
+    Returns:
+        已转化的特征表
+
+    """
 
     # 极端值处理
     abnormal_value = feature_engineering['abnormal_value']

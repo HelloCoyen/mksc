@@ -4,6 +4,7 @@ import numpy as np
 class Custom(object):
     """
     自定义预处理类函数封装
+    此处可以记录模型评估与调整过程
     """
     def __init__(self):
         self.cleaned_var = []
@@ -26,10 +27,10 @@ class Custom(object):
         feature_tmp = feature.copy()
         label_tmp = label.copy()
         # ------------------------------------------
-        # 自定义清洗, 每次使用均需保存变量名
+        # 自定义值清洗, 建议最后保存清洗列至类变量cleaned_var
         # eg.
         #     feature_tmp['variable'] = feature_tmp['variable']
-        #     self.cleaned_var.append('old_variable')
+        #     self.cleaned_var = ['old_variable']
         # ------------------------------------------
         return feature_tmp, label_tmp
 
@@ -45,14 +46,14 @@ class Custom(object):
         """
         feature_tmp = feature.copy()
         # ------------------------------------------
-        # 构造衍生变量, 每次使用均需保存变量名
+        # 构造衍生变量, 建议最后保存清洗列至类变量used_var
         # eg: feature_tmp['new_variable'] = feature_tmp['old_variable']
         #     feature_tmp.drop('old_variable', axis=1, inplace=True)
-        #     self.used_var.append('old_variable')
+        #     self.used_var = ['old_variable']
         # ------------------------------------------
 
         # 日期变量处理, 提取完后需要丢弃变量
-        datetime_var = feature_tmp.select_dtypes(include='datetime64[ns]').columns
+        datetime_var = feature_tmp.select_dtypes(include='datetime64').columns
         date_var = ['day', 'dayofweek', 'dayofyear', 'days_in_month', 'is_leap_year', 'is_month_end',
                     'is_month_start', 'is_quarter_end', 'is_quarter_start', 'is_year_end',
                     'is_year_start', 'month', 'quarter', 'week', 'weekday', 'weekofyear', 'year']
@@ -83,8 +84,8 @@ class Custom(object):
         """
         # ------------------------------------------
         # 后期调整的时候控制某些特征不进入训练，只能减少特征
+        # 将人为选择的特征放入类变量adjust_var
         # ------------------------------------------
-        self.adjust_var = []
         feature_tmp = feature[self.adjust_var]
         return feature_tmp
 
@@ -93,6 +94,7 @@ class Custom(object):
         print(f"本次自定义过程清洗的特征：{self.cleaned_var}")
         print(f"本次自定义过程组合的特征：{self.used_var}")
         print(f"本次自定义过程调整的特征：{self.adjust_var}")
+        print(f"本次自定义过程调整的分箱：{self.adjust_bins}")
 
     def model(self):
         """
@@ -107,11 +109,11 @@ class Custom(object):
 
 if __name__ == "__main__":
     # 自定义调试用代码
-    import mksc
-    from mksc.feature_engineering import preprocess
+    from mksc.utils import load_data, get_variable_type
+
     # 加载数据、变量类型划分、特征集与标签列划分
-    data = mksc.load_data()
-    numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
+    data = load_data(mode="train")
+    numeric_var, category_var, datetime_var, label_var = get_variable_type()
     feature = data[numeric_var + category_var + datetime_var]
     label = data[label_var]
     try:

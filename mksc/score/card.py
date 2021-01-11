@@ -5,6 +5,16 @@ import pandas as pd
 
 
 def make_score(odds, score, pdo):
+    """
+    计算几率与得分的线性系数a , b
+    Args:
+        odds:  基准几率值
+        score: 基准得分
+        pdo: 每2倍的增量
+
+    Returns:
+
+    """
     # odds = P_0 / P_1
     b = float(pdo) / log(2)
     a = float(score) - b * log(float(odds))
@@ -12,6 +22,15 @@ def make_score(odds, score, pdo):
 
 
 def make_card(coefs, woe_result, odds, score, pdo):
+    """
+    建立特征维度的评分卡
+    Args:
+        coefs: lr特征系数
+        woe_result:  特征woe值对象
+        odds: 基准几率
+        score: 基准几率得分
+        pdo: 几率翻翻得分增量
+    """
     # odds = P_0 / P_1
     a, b = make_score(odds, score, pdo)
     score_card = pd.DataFrame([['base_score', '-', '-', int(a - b * coefs['intercept_'])]],

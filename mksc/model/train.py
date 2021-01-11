@@ -11,7 +11,14 @@ from mksc.model import model_mapper, model_choose
 
 
 def training(feature, label, model_name=None, use=None, **kwargs):
-
+    """
+    训练模块
+    Args:
+        feature: 输入的特征
+        label:  输入的标签
+        model_name:  使用的模型名称，留空为遍历选最优
+        use: 使用的自定义模型，留空不使用
+    """
     print(f">>> 正样本比例：{label.sum()/len(label):.2f}")
     # 重采样
     if kwargs.get("resample", False):

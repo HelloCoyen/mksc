@@ -1,8 +1,8 @@
-﻿import pickle
+import pickle
 
-from mksc.feature_engineering import binning
-from mksc.feature_engineering import seletction
-from mksc.feature_engineering import values
+from mksc.feature import binning
+from mksc.feature import seletction
+from mksc.feature import values
 
 
 class FeatureEngineering(object):
@@ -82,6 +82,7 @@ class FeatureEngineering(object):
         # 正态化处理
         standard_lambda = None
         if self.kwargs.get("standard", False):
+            print(">>> 单变量预处理: 正态化")
             feature, standard_lambda = values.fix_standard(feature)
 
         # 数值特征最优分箱，未处理的变量，暂时退出模型
@@ -145,7 +146,7 @@ class FeatureEngineering(object):
         with open('result/feature_engineering.pickle', 'wb') as f:
             f.write(pickle.dumps(result))
 
-        with open('result/apply_sql.txt', 'w') as f:
+        with open('result/short_sql.txt', 'w') as f:
             feature_selected = set([v.split("__")[0] for v in result["feature_selected"]])
             sql = ",".join(feature_selected)
             f.write(f"你可以使用以下取数语句避免应用集过大无法进行select *操作，注意提前剔除组合变量\n\nselect {sql} from ")

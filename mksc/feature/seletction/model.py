@@ -17,7 +17,7 @@ def stepwise_selection(x, y, threshold_in=0.01, threshold_out=0.05):
         included：特征名称列表
     """
     included = []
-    numeric_var = x.select_dtypes(exclude=['object', 'datetime64[ns]']).columns
+    numeric_var = x.select_dtypes(exclude=['object', 'datetime64']).columns
     while True:
         changed = False
         # forward step

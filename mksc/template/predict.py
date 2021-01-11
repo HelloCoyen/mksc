@@ -3,27 +3,24 @@ import configparser
 import os
 from datetime import date
 from math import log
-
 import pandas as pd
 from statsmodels.iolib.smpickle import load_pickle
-
-import mksc
+from mksc.core.saver import save_result
+from mksc.utils import load_data, get_variable_type
+from mksc.feature.binning import tree_binning
+from mksc.feature import transform
 from custom import Custom
-from mksc.feature_engineering import preprocess
-from mksc.feature_engineering import scoring
-from mksc.feature_engineering import transform
 
-
-def main(model_name, dataset="apply", card=False, score=False, remote=False, local=False):
+def main(model_name, mode, read_local, score=False, save_remote=False):
     # 数据、模型加载
     model, threshold = load_pickle(f'result/{model_name}.pickle')
 
     feature_engineering = load_pickle('result/feature_engineering.pickle')
-    data = mksc.load_data(dataset, local=local)
-    numeric_var, category_var, datetime_var, label_var = preprocess.get_variable_type()
+    data = load_data(mode, read_local=read_local)
+    numeric_var, category_var, datetime_var, label_var = get_variable_type()
     numeric_var, category_var, datetime_var = [list(set(t) & set(data.columns)) for t in (numeric_var, category_var, datetime_var)]
     feature = data[numeric_var + category_var + datetime_var]
-    label = []
+    label = [] if mode != "train" else data[label_var]
 
     cs = Custom()
     # 自定义数据清洗
@@ -37,9 +34,8 @@ def main(model_name, dataset="apply", card=False, score=False, remote=False, loc
     # 自定义特征组合模块
     feature = cs.feature_combination(feature)
 
-    feature = feature[feature_engineering['feature_selected']]
-
     # 数据处理
+    feature = feature[feature_engineering['feature_selected']]
     feature = transform(feature, feature_engineering)
 
     # 应用预测
@@ -50,11 +46,6 @@ def main(model_name, dataset="apply", card=False, score=False, remote=False, loc
     res_prob['label_threshold'] = res_prob['probability_1'].apply(lambda x: 0 if x < threshold else 1)
     res = pd.concat([data, res_label, res_prob], axis=1)
 
-    if card and model_name == 'lr':
-        # 转化评分
-        score_card = load_pickle('result/card.pickle')
-        res = scoring.transform_score(res, score_card)
-
     if score:
         print(">>> 概率转换评分")
         cfg = configparser.ConfigParser()
@@ -62,36 +53,31 @@ def main(model_name, dataset="apply", card=False, score=False, remote=False, loc
         odds = cfg.get('SCORECARD', 'odds')
         score = cfg.get('SCORECARD', 'score')
         pdo = cfg.get('SCORECARD', 'pdo')
-        a, b = scoring.make_score(odds, score, pdo)
+        a, b = score.make_score(odds, score, pdo)
         res['score'] = res_prob['res_odds'].apply(lambda x: a + b * log(float(x)))
-        if dataset == "all":
-            if cs.adjust_bins:
-                bins = cs.adjust_bins
-            else:
-                from mksc.feature_engineering.binning import tree_binning
-                bins = tree_binning(res[label_var], res['score'].to_frame())[0]["result"]["score"]
-            print(">>> 训练集分组")
+        bins = tree_binning(res[label_var], res['score'].to_frame())[0]["result"]["score"] if mode == "train" else cs.adjust_bins
+        if bins:
+            print(">>> 数据集分组")
             res['level'] = pd.cut(res['score'], bins)
             temp = res.groupby("level", as_index=False).count()
-            temp['rate'] = temp[label_var] / feature.shape[0]
+            temp['rate'] = temp['label_threshold'] / feature.shape[0]
             temp = temp[['level', 'rate']]
             print(temp)
             print(res.head())
 
     # 结果保存
-    print(f">>> 结果保存中，保存模式：{remote}")
+    print(f">>> 结果保存中，保存模式：{save_remote}")
     res['load_date'] = str(date.today())
-    mksc.save_result(res, filename=f"{dataset}_result.csv", remote=remote)
+    save_result(res, filename=f"{mode}_result.csv", remote=save_remote)
 
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
+    args.add_argument("--mode", type=str, required=True, help="预测模式")
     args.add_argument("-m", "--model", type=str, required=True, help=r"模型选择：xgb\lr\svm\rf\gbdt\lgb\dt\自定义")
-    args.add_argument("-d", "--dataset", type=str, default="apply", help="预测数据集")
-    args.add_argument("-c", "--card", type=bool, default=False, help="是否制作评分卡")
-    args.add_argument("-s", "--score", type=bool, default=False, help="是否转换成评分")
-    args.add_argument("-r", "--remote", type=bool, default=False,  help="是否保存远程")
-    args.add_argument("-l", "--local", type=bool, default=False,  help="是否读取远程")
+    args.add_argument("--score", action="store_true", help="有该参数表示概率转换成得分")
+    args.add_argument("--remote", action="store_true", help="有该参数表示保存远程")
+    args.add_argument("--read_local", action="store_true",  help="有该参数表示读取本地")
     accepted = vars(args.parse_args())
     main(model_name=accepted['model'], dataset=accepted['dataset'], card=accepted['card'],
          score=accepted['score'], remote=accepted['remote'], local=accepted['local'])
